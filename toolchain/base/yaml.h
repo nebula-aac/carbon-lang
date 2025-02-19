@@ -47,13 +47,13 @@ class OutputScalar {
           val.print(out, /*isSigned=*/false);
         }) {}
 
-  explicit OutputScalar(std::function<void(llvm::raw_ostream&)> output)
+  explicit OutputScalar(std::function<auto(llvm::raw_ostream&)->void> output)
       : output_(std::move(output)) {}
 
   auto Output(llvm::raw_ostream& out) const -> void { output_(out); }
 
  private:
-  std::function<void(llvm::raw_ostream&)> output_;
+  std::function<auto(llvm::raw_ostream&)->void> output_;
 };
 
 // Adapts a function for outputting YAML as a mapping.
@@ -74,13 +74,13 @@ class OutputMapping {
     llvm::yaml::IO& io_;
   };
 
-  explicit OutputMapping(std::function<void(OutputMapping::Map)> output)
+  explicit OutputMapping(std::function<auto(OutputMapping::Map)->void> output)
       : output_(std::move(output)) {}
 
   auto Output(llvm::yaml::IO& io) -> void { output_(Map(io)); }
 
  private:
-  std::function<void(OutputMapping::Map)> output_;
+  std::function<auto(OutputMapping::Map)->void> output_;
 };
 
 }  // namespace Carbon::Yaml
@@ -94,7 +94,7 @@ struct llvm::yaml::ScalarTraits<Carbon::Yaml::OutputScalar> {
   }
   static auto input(StringRef /*scalar*/, void* /*ctxt*/,
                     Carbon::Yaml::OutputScalar& /*value*/) -> StringRef {
-    CARBON_FATAL() << "Input is unsupported.";
+    CARBON_FATAL("Input is unsupported.");
   }
   static auto mustQuote(StringRef /*value*/) -> QuotingType {
     return QuotingType::None;

@@ -6,17 +6,22 @@
 
 namespace Carbon {
 
-void PrintTo(const Diagnostic& diagnostic, std::ostream* os) {
-  *os << "Diagnostic{" << diagnostic.message.kind << ", ";
+auto PrintTo(const Diagnostic& diagnostic, std::ostream* os) -> void {
+  *os << "Diagnostic{";
   PrintTo(diagnostic.level, os);
-  *os << ", " << diagnostic.message.location.file_name << ":"
-      << diagnostic.message.location.line_number << ":"
-      << diagnostic.message.location.column_number << ", \""
-      << diagnostic.message.format_fn(diagnostic.message) << "\"}";
+  for (const auto& message : diagnostic.messages) {
+    *os << ", {" << message.loc.filename << ":" << message.loc.line_number
+        << ":" << message.loc.column_number << ", \"" << message.Format()
+        << "}";
+  }
+  *os << "\"}";
 }
 
-void PrintTo(DiagnosticLevel level, std::ostream* os) {
+auto PrintTo(DiagnosticLevel level, std::ostream* os) -> void {
   switch (level) {
+    case DiagnosticLevel::LocationInfo:
+      *os << "LocationInfo";
+      break;
     case DiagnosticLevel::Note:
       *os << "Note";
       break;
